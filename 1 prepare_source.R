@@ -4,7 +4,8 @@
 remove(list = ls())
 
 
-packages=c("tidyverse","openxlsx","readxl")
+packages=c("tidyverse","openxlsx","readxl",
+           "countrycode")
 
 
 lapply(packages, function(x){

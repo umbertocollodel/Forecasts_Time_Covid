@@ -84,7 +84,10 @@ subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America")
 
 df <- subdirectory %>% 
   map(~ clean_consensus(main_path,.x)) %>% 
-  bind_rows()
+  bind_rows() %>% 
+  mutate(country = case_when(country == "USA" ~ "United States",
+                             country == "UK" ~ "United Kingdom",
+                             T ~ country))
 
 
 saveRDS(df, "../Forecasts_Time_Covid_material/intermediate_data/consensus_2020.RDS")

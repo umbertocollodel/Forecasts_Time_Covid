@@ -12,17 +12,28 @@
 #' 
 #' @return tibble with three identifiers (horizon, value, country)
 #' 
-#' @details Problem with Asia-Pacific: one sheet is missing data for Vietnam.
+#' @details Problem with Asia-Pacific: one sheet is missing data for Vietnam. For the moment we remove it completelly.
 
 
 
 clean_consensus <- function(main_path,subdirectory){
 
+  if(subdirectory == "Asia_Pacific"){
+    
 name_countries= list.files(paste0(main_path,"/",subdirectory)) %>% 
   map_chr(~ paste0(main_path,"/",subdirectory,"/",.x)) %>% 
   map(~ .x %>% getSheetNames()) %>% 
   map(~ .x %>% str_subset("A1|TrendCharts|Data|Additional|Forex|Oil|Copyright", negate = T)) %>% 
-  .[[1]]
+  .[[1]] %>% 
+  str_subset("Vietnam",negate = T)
+  }
+  else{
+  name_countries= list.files(paste0(main_path,"/",subdirectory)) %>% 
+    map_chr(~ paste0(main_path,"/",subdirectory,"/",.x)) %>% 
+    map(~ .x %>% getSheetNames()) %>% 
+    map(~ .x %>% str_subset("A1|TrendCharts|Data|Additional|Forex|Oil|Copyright", negate = T)) %>% 
+    .[[1]]
+  }
 
   
 path_files=list.files(paste0(main_path,"/",subdirectory)) %>% 

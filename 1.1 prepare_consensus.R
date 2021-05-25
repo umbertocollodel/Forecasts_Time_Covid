@@ -12,7 +12,7 @@
 #' 
 #' @return tibble with three identifiers (horizon, value, country)
 #' 
-#' @details 
+#' @details Problem with Asia-Pacific: one sheet is missing data for Vietnam.
 
 
 
@@ -64,7 +64,7 @@ dfs_final %>%
 
 
 main_path="../Forecasts_Time_Covid_material/raw_data/Consensus_2020"
-subdirectory=c("G7_Western_Europe","East_Europe","Latin_America")
+subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America")
 
 
 

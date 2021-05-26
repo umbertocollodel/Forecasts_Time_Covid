@@ -1,25 +1,34 @@
 ########### Script to prepare WEO forecasts: 
+# DESCRIPTION: cleans forecasts for 2020 growth rate from all 2020 WEO issues
+# FOR EXTERNAL USERS: change paths to local paths with january and july updates and april and october issues
 
 
-# Clean June and January 2020 WEO ----
+# Clean June,January 2020 WEO and Actuals from April 2021 WEO ----
 
-june_2020 <- read_xlsx("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/weo_july_update.xlsx", sheet = "jul2020") %>%
-  slice(1: which(Country == "Zimbabwe")) %>% 
-  select(Series_code, `2019`:`2020`) %>% 
-  select(-matches("Q")) %>% 
-  mutate(country_code = str_extract(Series_code,"\\d{3}")) %>% 
-  mutate(Jun = ((`2020` - `2019`)/`2019`)*100,
-         year = "2020") %>% 
-  select(country_code,year,Jun)
+# Set Parameters
 
-jan_2020 <- read_xlsx("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/weo_january_update.xlsx", sheet = "jan2020") %>%
-  slice(1: which(Country == "Zimbabwe")) %>% 
-  select(Series_code, `2019`:`2020`) %>% 
-  select(-matches("Q")) %>% 
-  mutate(country_code = str_extract(Series_code,"\\d{3}")) %>% 
-  mutate(Jan = ((`2020` - `2019`)/`2019`)*100,
-         year = "2020") %>% 
-  select(country_code,year,Jan)
+paths=c("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/weo_july_update.xlsx",
+        "~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/weo_january_update.xlsx",
+        "~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/weo_rgdp.xlsx")
+
+sheets=c("jul2020","jan2020","apr2021")
+
+var_name=c("Jun","Jan","Actual")
+
+# Clean
+
+
+forecasts_updates <- paths %>% 
+  map2(sheets, ~ read_xlsx(.x,sheet = .y)) %>% 
+  map(~ .x %>% slice(1: which(Country == "Zimbabwe"))) %>% 
+  map(~ .x %>% select(Series_code, `2019`:`2020`)) %>% 
+  map(~ .x %>% select(-matches("Q"))) %>% 
+  map(~ .x %>% mutate(country_code = str_extract(Series_code,"\\d{3}"))) %>% 
+  map(~ .x %>% mutate(growth_2020 = ((`2020` - `2019`)/`2019`)*100,
+               year = "2020")) %>% 
+  map(~ .x %>% select(country_code,year,growth_2020)) %>% 
+  map2(var_name, ~ .x %>% setNames(c("country_code", "year", .y)))
+
 
 
 # Wrangle WEO April & October: ----
@@ -123,10 +132,10 @@ forecast_2020 <- wrangle_weo_forecasts("~/Dropbox/When_where_and_why/When_where_
 
 
 
-# Combine them and export: -----
+# Combine all and export: -----
 
 
-weo_2020 <- list(forecast_2020,jan_2020,june_2020) %>% 
+weo_2020 <- c(list(forecast_2020), forecasts_updates) %>% 
   reduce(merge, by=c("country_code","year")) %>% 
   as_tibble() %>% 
   gather("horizon","value",Oct:ncol(.))

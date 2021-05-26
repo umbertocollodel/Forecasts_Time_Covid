@@ -5,7 +5,7 @@ remove(list = ls())
 
 
 packages=c("tidyverse","openxlsx","readxl",
-           "countrycode")
+           "countrycode","rio")
 
 
 lapply(packages, function(x){

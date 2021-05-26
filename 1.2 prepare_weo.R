@@ -138,7 +138,7 @@ forecast_2020 <- wrangle_weo_forecasts("~/Dropbox/When_where_and_why/When_where_
 weo_2020 <- c(list(forecast_2020), forecasts_updates) %>% 
   reduce(merge, by=c("country_code","year")) %>% 
   as_tibble() %>% 
-  gather("horizon","value",Oct:ncol(.))
+  gather("horizon","value",Oct:Jan)
 
 
 saveRDS(weo_2020,"../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS")

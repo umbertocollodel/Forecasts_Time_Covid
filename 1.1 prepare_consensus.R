@@ -1,4 +1,5 @@
 # DESCRIPTION: the script produces a dataframe with Consensus forecasts for 2020 for each month of the year and country. 
+# FOR EXTERNAL USERS: change main path with location regional subdirectories Consensus forecasts and export path
 
 # Wrangling Consensus forecasts function ----
 

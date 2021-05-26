@@ -1,22 +1,36 @@
-# Combine Consensus and WEO
+###### Script to compare individual country forecasts from WEO and Consensus
+
+
+# Combine Consensus and WEO intermediate data -----
 
 names_df=c("consensus_2020","weo_2020")
 
 
 comparison_df <- names_df %>% 
   map(~ readRDS(paste0("../Forecasts_Time_Covid_material/intermediate_data/",.x,".RDS"))) %>% 
-  reduce(merge, by=c("country","horizon"), all.x = T) %>%
-  as_tibble() 
+  reduce(merge, by=c("country","horizon"), all.x = T) %>% #keep only data availability for Consensus
+  as_tibble() %>% 
+  setNames(c("country","horizon","consensus","country_code","year","actual","imf")) %>% 
+  split(.$country) %>% 
+  map(~ .x %>% mutate(actual = case_when(is.na(actual) ~ unique(actual)[1],
+                                         T ~ actual))) %>%
+  map(~ .x %>% mutate(country_code = case_when(is.na(country_code) ~ unique(country_code)[1],
+                                         T ~ country_code))) %>%
+  bind_rows() %>% 
+  select(country_code, country, horizon, actual, consensus,imf)
 
-  
-  
 
+export(comparison_df,"../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx")
+
+
+# Run comparison ------
+
+# List of individual countries:
+  
 individual_countries=c("Brazil","India","United States")  
 
 individual_countries %>% 
   map(~ comparison_df %>% filter(country == .x)) %>% 
-  map(~ .x %>% setNames(c("country","horizon","consensus","country_code","year","imf"))) %>% 
-  map(~ .x %>% select(country,horizon, consensus,imf)) %>% 
   map(~ .x %>% gather("institution","value",consensus:imf)) %>% 
   map(~ .x %>% mutate(horizon = factor(horizon, levels = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug",
                                                            "Sep","Oct","Nov","Dec")))) %>% 

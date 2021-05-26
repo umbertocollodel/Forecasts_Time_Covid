@@ -29,7 +29,10 @@ export(comparison_df,"../Forecasts_Time_Covid_material/intermediate_data/replica
   
 individual_countries=c("Brazil","India","United States")  
 
-individual_countries %>% 
+
+# Plot:
+
+individual_plots <- individual_countries %>% 
   map(~ comparison_df %>% filter(country == .x)) %>% 
   map(~ .x %>% gather("institution","value",consensus:imf)) %>% 
   map(~ .x %>% mutate(horizon = factor(horizon, levels = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug",
@@ -39,10 +42,12 @@ individual_countries %>%
   map(~ .x %>% 
         ggplot(aes(horizon,value, col = institution)) +
         geom_vline(xintercept = c("Jan","Apr","Jun","Oct"), size = 15, col = "gray", alpha = 0.7) + 
+        geom_hline(aes(yintercept = actual, linetype = "Actual"), size = 1.5) +
         geom_point(size = 3, alpha = 0.8) +
         ylab("Real GDP Growth Forecast (%)") +
         xlab("") +
-        labs(col = "") +
+        labs(col = "",
+             linetype = "") +
         scale_color_manual(values = c("#4472C4","#ED7D31")) +
         theme_minimal() +
         theme(legend.position = "bottom",
@@ -50,4 +55,18 @@ individual_countries %>%
         theme(axis.text = element_text(size = 18),
               axis.title = element_text(size = 21))
       )
+
+
+# Export:
+
+names(individual_plots) = individual_countries
+
+individual_plots %>% 
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/individual_comparison/",.y,".pdf"),
+                 .x,
+                 height = 5.8,
+                 width = 12.3))
+
+
+
 

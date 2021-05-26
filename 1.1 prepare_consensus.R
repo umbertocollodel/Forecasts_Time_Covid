@@ -87,6 +87,7 @@ df <- subdirectory %>%
   bind_rows() %>% 
   mutate(country = case_when(country == "USA" ~ "United States",
                              country == "UK" ~ "United Kingdom",
+                             country == "Czechia" ~ "Czech Republic",
                              T ~ country))
 
 

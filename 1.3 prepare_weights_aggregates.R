@@ -1,4 +1,4 @@
-########## Script to construct weights used in aggregate forecasts from WEO over different 2020 issues
+########## Script to construct weights used in aggregate forecasts from WEO over different 2020 issues:
 
 # Set parameters: ----
 
@@ -10,10 +10,9 @@ paths=rep("../Forecasts_Time_Covid_material/raw_data/gdp_ppp_2020.xlsx",4)
 
 
 
-# Construct country weights for the country groups from GDP PPP serie: ----
+# Construct country weights for global aggregate from GDP PPP serie: ----
 
-
-# Dataframe with GDP PPP and country group classification:
+# Forecasts at different horizons:
 
 
 df_weights_global <- sheets %>% 
@@ -31,7 +30,7 @@ df_weights_global <- sheets %>%
   select(-value)
 
 
-# Construct weights for actual value:
+# Actual value:
 
 df_weights_global_actual <- read_xlsx("../Forecasts_Time_Covid_material/raw_data/gdp_ppp_2020.xlsx", sheet = "apr2021") %>% 
   slice(1: which(Country == "Zimbabwe")) %>% 
@@ -46,52 +45,3 @@ df_weights_global_actual <- read_xlsx("../Forecasts_Time_Covid_material/raw_data
   rename(actual_weight = weight)
   
   
-  map2(sheets, ~ .x %>% mutate(horizon = str_to_sentence(str_remove(.y,"2020"))) %>%
-
-
-
-
-
-
-%>% 
-  map(~ .x %>% merge(read_xlsx("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/country_group.xlsx"), by = "ifscode")) %>% 
-  map(~ .x %>% as_tibble())
-
-# Filter by income group and calculate weight as individula GDP value over total of the group:
-
-
-df_weights_lidc <- preliminary_df_weights %>%   
-  map(~ .x %>% filter(lidc == 1)) %>% 
-  map(~ .x %>% group_by(year)) %>% 
-  map(~ .x %>% mutate(weight = value/sum(value, na.rm = T))) 
-
-df_weights_em <- preliminary_df_weights %>%   
-  map(~ .x %>% filter(eme == 1 & lidc == 0)) %>% 
-  map(~ .x %>% group_by(year)) %>% 
-  map(~ .x %>% mutate(weight = value/sum(value, na.rm = T)))
-
-df_weights_adv <- preliminary_df_weights %>%   
-  map(~ .x %>% filter(adv == 1)) %>% 
-  map(~ .x %>% group_by(year)) %>% 
-  map(~ .x %>% mutate(weight = value/sum(value, na.rm = T))) 
-
-# Get list of countries by group:
-
-em_list=df_weights_em[[1]] %>% 
-  .$ifscode %>% 
-  unique()
-
-lidc_list=df_weights_lidc[[1]] %>% 
-  .$ifscode %>% 
-  unique()
-
-adv_list=df_weights_adv[[1]] %>% 
-  .$ifscode %>% 
-  unique()
-
-
-
-
-
-
-

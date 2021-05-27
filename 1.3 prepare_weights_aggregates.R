@@ -45,3 +45,8 @@ df_weights_global_actual <- read_xlsx("../Forecasts_Time_Covid_material/raw_data
   rename(actual_weight = weight)
   
   
+
+# Export: ----
+
+list(df_weights_global, df_weights_global_actual) %>% 
+  walk2(c("","_actual"), ~ saveRDS(.x,paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_global",.y,".RDS")))

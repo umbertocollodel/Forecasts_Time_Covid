@@ -1,7 +1,9 @@
-# Comparison between aggregates:
-# have to build 2020 weights from January, April, June and October 2020 WEO
-# will extrapolate for the months not covered in Consensus
+########## Script to compare global growth forecasts from Consensus and WEO
 
+
+
+# Prepare weights dataframe for merging with comparison dataframe (need to have all horizons) -----
+# Note: apply same weights for following months after WEO issue before the next issue
 
 weights_global_comparison <- df_weights_global %>% 
   split(.$horizon) %>% 
@@ -12,8 +14,10 @@ weights_global_comparison <- df_weights_global %>%
 
 
   
+# Combine comparison dataframe with weight dataframes: -----
 
-read_xlsx("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx") %>% 
+
+global_comparison_df <- read_xlsx("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx") %>% 
   merge(weights_global_comparison, by=c("country_code","horizon")) %>% 
   merge(df_weights_global_actual, by=c("country_code")) %>% 
   as_tibble() %>%
@@ -30,7 +34,13 @@ read_xlsx("../Forecasts_Time_Covid_material/intermediate_data/replication_figure
                                                            "Sep","Oct","Nov","Dec"))) %>% 
   gather("institution","value",global_consensus:global_imf) %>% 
   mutate(institution = case_when(institution == "global_consensus" ~ "Consensus",
-                                              institution == "global_imf" ~ "WEO")) %>% 
+                                              institution == "global_imf" ~ "WEO")) 
+
+
+
+# Plot and export (both plot and df for construction): -----
+
+global_comparison_df %>% 
   ggplot(aes(horizon,value, col = institution)) +
   geom_vline(xintercept = c("Jan","Apr","Jun","Oct"), size = 15, col = "gray", alpha = 0.7) + 
   geom_hline(aes(yintercept = global_actual, linetype = "Actual"), size = 1.5) +
@@ -52,6 +62,7 @@ ggsave("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/Glo
                  height = 5.8,
                  width = 12.3)
 
+export(global_comparison_df, "../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_global.xlsx")
 
 
 

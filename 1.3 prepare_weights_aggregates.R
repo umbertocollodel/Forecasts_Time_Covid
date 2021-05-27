@@ -31,6 +31,28 @@ df_weights_global <- sheets %>%
   select(-value)
 
 
+# Construct weights for actual value:
+
+df_weights_global_actual <- read_xlsx("../Forecasts_Time_Covid_material/raw_data/gdp_ppp_2020.xlsx", sheet = "apr2021") %>% 
+  slice(1: which(Country == "Zimbabwe")) %>% 
+  select(Series_code,`1950`:ncol(.)) %>%
+  mutate(Series_code = str_extract(Series_code, "\\d{3}")) %>% 
+  select(-matches("Q|M")) %>% 
+  gather("year","value",`1950`:ncol(.)) %>% 
+  filter(year == 2020) %>% 
+  rename(country_code = Series_code) %>% 
+  mutate(weight = value/sum(value,na.rm = T)) %>%
+  select(country_code,weight) %>% 
+  rename(actual_weight = weight)
+  
+  
+  map2(sheets, ~ .x %>% mutate(horizon = str_to_sentence(str_remove(.y,"2020"))) %>%
+
+
+
+
+
+
 %>% 
   map(~ .x %>% merge(read_xlsx("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/country_group.xlsx"), by = "ifscode")) %>% 
   map(~ .x %>% as_tibble())

@@ -18,8 +18,8 @@ weights_global_comparison <- df_weights_global %>%
 
 
 global_comparison_df <- read_xlsx("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx") %>% 
-  merge(weights_global_comparison, by=c("country_code","horizon")) %>% 
-  merge(df_weights_global_actual, by=c("country_code")) %>% 
+  merge(readRDS("../Forecasts_Time_Covid_material/intermediate_data/weights_global.RDS"), by=c("country_code","horizon")) %>% 
+  merge(readRDS("../Forecasts_Time_Covid_material/intermediate_data/weights_global_actual.RDS"), by=c("country_code")) %>% 
   as_tibble() %>%
   mutate(imf_weighted = imf*weight,
          consensus_weighted = consensus*weight,

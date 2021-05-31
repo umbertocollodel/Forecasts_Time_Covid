@@ -60,9 +60,11 @@ list_plots_income <- comparison_list %>%
 
 names(list_plots_income)=c("adv","em","lidc")
 
+# Export:
 
 list_plots_income %>% 
-  iwalk(~ ggsave(.x, paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/",.y,".pdf"),
-       height = 5.8,
-       width = 12.3))
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/",.y,".pdf"),
+                 .x,
+                 height = 5.8,
+                 width = 12.3))
 

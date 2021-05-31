@@ -70,6 +70,30 @@ names(list_weights_group)=c("adv","em","lidc")
 list_weights_group %>% 
   iwalk(~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_",.y,".RDS")))
 
+# Same process for actual values (April 2021 WEO issue): ---- 
+
+df_actuals_2020 <- clean_weo_2020_forecasts("../Forecasts_Time_Covid_material/raw_data/gdp_ppp_2020.xlsx", sheet = "apr2021") %>% 
+  rename(ifscode = country_code) %>% 
+  merge(country_groups_df, by=c("ifscode")) 
+
+
+# Actuals for every group and calculation weights:
+
+list_actual_weights_group <- conditions %>% 
+  map(~ df_actuals_2020 %>% filter_(.x)) %>% 
+  map(~ .x %>% mutate(weight = value/sum(value,na.rm = T))) %>%
+  map(~ .x %>% select(ifscode,weight)) %>% 
+  map(~ .x %>% rename(actual_weight = weight))
+
+
+
+names(list_actual_weights_group)=c("adv","em","lidc")
+
+# Export:
+
+list_actual_weights_group %>% 
+  iwalk(~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_",.y,"_actual.RDS")))
+
 
 
 

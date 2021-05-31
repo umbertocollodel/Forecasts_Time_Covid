@@ -1,7 +1,9 @@
 ########## Script to compare income groups forecasts from Consensus and WEO
 
-list_weights=c("adv","em","lidc") %>% 
-  map_chr(~ paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_",.x,".RDS")) %>% 
+income_groups=c("adv","em","lidc")
+
+list_weights_group=income_groups %>% 
+  map_chr(~ paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_",.x,".RDS")) %>% 
   map(~ read_rds(.x))
 
 # Prepare weights dataframe for merging with comparison dataframe (need to have all horizons) -----
@@ -18,7 +20,10 @@ extrapolate_horizons <- function(df){
 }
 
 
-comparison_list <- list_weights %>% 
+# Combine comparison dataframes with weights dataframes: -----
+
+
+comparison_list_group <- list_weights_group %>% 
   map(~ extrapolate_horizons(.x)) %>% 
   map(~ .x %>% merge(read_xlsx("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx") %>% 
         rename(ifscode = country_code), by=c("ifscode","horizon"))) %>% 
@@ -38,13 +43,14 @@ comparison_list <- list_weights %>%
 
 
   
+names(comparison_list_group)=income_groups
 
 
 # Plot and export (both plot and df for construction): -----
 
-list_plots_income <- comparison_list %>% 
-  map(~ .x %>% ggplot(aes(horizon,value, col = institution)) +
-  geom_vline(xintercept = c("Jan","Apr","Jun","Oct"), size = 15, col = "gray", alpha = 0.7) + 
+list_plots_income <- comparison_list_group %>% 
+  map(~ .x %>% 
+  ggplot(aes(horizon,value, col = institution)) +
   geom_point(size = 3, alpha = 0.8) +
   ylab("Real GDP Growth Forecast (%)") +
   xlab("") +
@@ -54,17 +60,30 @@ list_plots_income <- comparison_list %>%
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 15)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21)))
 
 
-names(list_plots_income)=c("adv","em","lidc")
 
 # Export:
+
+
+
+# Plots:
 
 list_plots_income %>% 
   iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/",.y,".pdf"),
                  .x,
-                 height = 5.8,
-                 width = 12.3))
+                 height = 5.7,
+                 width = 11))
+
+# Data:
+
+comparison_list_group %>% 
+  iwalk(~ export(.x,paste0("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_",.y,".xlsx")))
+
+
+
+ 
 

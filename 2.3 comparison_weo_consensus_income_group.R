@@ -42,7 +42,7 @@ comparison_list <- list_weights %>%
 
 # Plot and export (both plot and df for construction): -----
 
-comparison_list %>% 
+list_plots_income <- comparison_list %>% 
   map(~ .x %>% ggplot(aes(horizon,value, col = institution)) +
   geom_vline(xintercept = c("Jan","Apr","Jun","Oct"), size = 15, col = "gray", alpha = 0.7) + 
   geom_point(size = 3, alpha = 0.8) +
@@ -58,10 +58,11 @@ comparison_list %>%
         axis.title = element_text(size = 21)))
 
 
+names(list_plots_income)=c("adv","em","lidc")
 
-ggsave("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/Global.pdf",
+
+list_plots_income %>% 
+  iwalk(~ ggsave(.x, paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/",.y,".pdf"),
        height = 5.8,
-       width = 12.3)
-
-export(global_comparison_df, "../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_global.xlsx")
+       width = 12.3))
 

@@ -78,7 +78,8 @@ names(final_list)=c("adv","em","lidc")
 # Export: -----
 
 
-
+final_list %>% 
+  iwalk(~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/weights_",.y,".RDS")))
 
 
 

@@ -42,10 +42,19 @@ names(weo_group_df) = group_names
 # Note: all.x in the merge to keep all weo horizons (also those for which no wb data), we then filter by the list of
 # countries for which world bank forecasts to remove cases in which only imf values that would bias the aggregate calculation
 
-preliminary_df <- weo_group_df %>% 
+weo_wb <- weo_group_df %>% 
   map(~ .x %>% merge(wb, by=c("country_code","horizon"), all.x = T)) %>% 
   map(~ .x %>% as_tibble()) %>% 
   map(~ .x %>% filter(country_code %in% wb_list))
+
+# Combine with weights actuals: ----
+
+paths=c("../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_em_actual.RDS",
+        "../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_lidc_actual.RDS")
+
+preliminary_df <- weo_wb %>% 
+  map2(paths, ~ .x %>% merge(read_rds(.y) %>% rename(country_code = ifscode), by = c("country_code"))) %>% 
+  map(~ .x %>% as_tibble())
 
 
 
@@ -54,12 +63,13 @@ preliminary_df <- weo_group_df %>%
 
 df <- preliminary_df %>% 
   map(~ .x %>% mutate(imf_weighted = imf*weight,
-         wb_weighted = wb*weight)) %>% 
+         wb_weighted = wb*weight,
+         actuals_weighted = Actual*actual_weight)) %>% 
   map(~ .x %>% group_by(horizon)) %>% 
   map(~ .x %>% summarise_at(vars(contains("weighted")),funs(sum(. , na.rm = T)))) %>%
   map(~ .x %>% mutate(wb_weighted = case_when(wb_weighted == 0 ~ NA_real_,
                                 T ~ wb_weighted))) %>% 
-  map(~ .x %>% gather("institution","value",imf_weighted:ncol(.))) %>% 
+  map(~ .x %>% gather("institution","value",imf_weighted:wb_weighted)) %>% 
   map(~ .x %>% mutate(institution = case_when(institution == "imf_weighted" ~ "WEO",
                                  institution == "wb_weighted" ~ "GEP"))) %>% 
   map(~ .x %>% mutate(horizon = factor(horizon, levels = c("Jan","Apr","Jun","Oct"))))
@@ -70,12 +80,14 @@ df <- preliminary_df %>%
 group_plots <- df %>% 
   map(~ .x %>% 
   ggplot(aes(horizon, value, col = institution)) +
+  geom_hline(aes(yintercept = actuals_weighted, linetype = "Actual"), size = 1.5, col = "gray") +
   geom_point(size = 3, alpha = 0.8) +
   ylab("Real GDP Growth Forecast (%)") +
   xlab("") +
   labs(col = "",
        linetype = "") +
   scale_color_manual(values = c("#4472C4","#ED7D31")) +
+  scale_linetype_manual(values = "dotted") +
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.text = element_text(size = 15)) +

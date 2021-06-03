@@ -87,7 +87,7 @@ list_plots_income <- comparison_list_group %>%
 # Plots:
 
 list_plots_income %>% 
-  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/",.y,".pdf"),
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/consensus/",.y,".pdf"),
                  .x,
                  height = 5.7,
                  width = 11))
@@ -95,7 +95,7 @@ list_plots_income %>%
 # Data:
 
 comparison_list_group %>% 
-  iwalk(~ export(.x,paste0("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_",.y,".xlsx")))
+  iwalk(~ export(.x,paste0("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/aggregate_comparison/consensus/",.y,".xlsx")))
 
 
 

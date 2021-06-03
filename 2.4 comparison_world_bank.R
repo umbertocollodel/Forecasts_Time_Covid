@@ -18,17 +18,24 @@ wb_list=unique(wb$country_code) %>%
 
 # Combine WEO forecasts with weights for EMs and LICs: ----
 
+# Set parameters:
+
 path_weights=c("../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_em.RDS",
                "../Forecasts_Time_Covid_material/intermediate_data/weights_aggregates/weights_lidc.RDS")
 
 path_forecasts=rep("../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS",2)
 
+group_names=c("em","lidc")
+
+# Combine:
 
 weo_group_df <- path_weights %>% 
   map(~ read_rds(.x)) %>% 
   map(~ .x %>% rename(country_code = ifscode)) %>% 
   map2(path_forecasts, ~ .x %>% merge(read_rds(.y), by=c("country_code","horizon","year"))) %>% 
   map(~ .x %>% rename(imf = value)) 
+
+names(weo_group_df) = group_names
 
 
 # Combine with World Bank forecasts: -----
@@ -60,7 +67,7 @@ df <- preliminary_df %>%
 
 # Plot and export: -----
 
-df %>% 
+group_plots <- df %>% 
   map(~ .x %>% 
   ggplot(aes(horizon, value, col = institution)) +
   geom_point(size = 3, alpha = 0.8) +
@@ -74,6 +81,23 @@ df %>%
         legend.text = element_text(size = 15)) +
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21)))
+
+
+
+# Export:
+
+group_plots %>% 
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/aggregate_comparison/world_bank/",.y,".pdf"),
+                 .x,
+                 height = 5.7,
+                 width = 11))
+
+
+df %>% 
+  iwalk(~ export(.x,
+                 paste0("../Forecasts_Time_Covid_material/intermediate_data/replication_figures/aggregate_comparison/world_bank/",.y,".xlsx")))
+
+
 
 
 

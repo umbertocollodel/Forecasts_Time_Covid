@@ -1,6 +1,8 @@
 ####### Script to show whether pessimistic forecaster errors in June generalized or some big outliers: 
 # The distribution plot of weighted June forecast errors shows some big outliers.
-# To highlight them, we plot a scatter comparing weighted actual and weighted forecasts.
+# To identify them better, we plot a scatter comparing weighted actual and weighted forecasts and 
+# highlight the top 5 forecast errors: toghether these countries account for 42.17% of the global forecast.
+
 
 
 
@@ -47,3 +49,5 @@ df %>%
 ggsave("../Forecasts_Time_Covid_material/output/figures/june_errors.pdf",
        width = 9.7,
        height = 6.4)
+
+

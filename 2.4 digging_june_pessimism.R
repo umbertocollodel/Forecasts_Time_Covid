@@ -1,4 +1,7 @@
 ####### Script to show whether pessimistic forecaster errors in June generalized or some big outliers: 
+# The distribution plot of weighted June forecast errors shows some big outliers.
+# To highlight them, we plot a scatter comparing weighted actual and weighted forecasts.
+
 
 
 # Build dataframe: -----
@@ -38,6 +41,8 @@ df %>%
         axis.text = element_text(size = 18))
 
   
+
+# Export:
 
 ggsave("../Forecasts_Time_Covid_material/output/figures/june_errors.pdf",
        width = 9.7,

@@ -10,6 +10,7 @@
 #' 
 #' @param main_path Path to directory with Consensus forecasts.
 #' @param subdirectory Subdirectory after main path with regional distinction survey.
+#' @param row_value_to_extract Number of row with the value to extract: can be 7 for mean or 11 for sd
 #' 
 #' @return tibble with three identifiers (horizon, value, country)
 #' 
@@ -17,7 +18,7 @@
 
 
 
-clean_consensus <- function(main_path,subdirectory){
+clean_consensus <- function(main_path,subdirectory,row_value_to_extract){
 
   if(subdirectory == "Asia_Pacific"){
     
@@ -53,7 +54,7 @@ df_to_clean=path_files %>%
 
 
 dfs_final =df_to_clean %>%
-  modify_depth(2, ~ .x %>% slice(7)) %>% 
+  modify_depth(2, ~ .x %>% slice(row_value_to_extract)) %>% 
   modify_depth(2, ~ .x %>% select(3)) %>%
   modify_depth(2, ~ .x %>% setNames(c("value"))) %>%
   map(~ .x %>% bind_rows()) %>% 
@@ -84,7 +85,7 @@ subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America")
 
 
 df <- subdirectory %>% 
-  map(~ clean_consensus(main_path,.x)) %>% 
+  map(~ clean_consensus(main_path,.x, 7)) %>% 
   bind_rows() %>% 
   mutate(country = case_when(country == "USA" ~ "United States",
                              country == "UK" ~ "United Kingdom",

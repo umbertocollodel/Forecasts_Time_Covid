@@ -81,11 +81,21 @@ subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America")
 
 
 
-# Running the function and export intermediate dataset: -----
+# Running the function and export intermediate datasets: -----
 
+# Mean forecast:
 
-df <- subdirectory %>% 
+df_mean <- subdirectory %>% 
   map(~ clean_consensus(main_path,.x, 7)) %>% 
+  bind_rows() %>% 
+  mutate(country = case_when(country == "USA" ~ "United States",
+                             country == "UK" ~ "United Kingdom",
+                             country == "Czechia" ~ "Czech Republic",
+                             T ~ country))
+# Standard deviation:
+
+df_sd <- subdirectory %>% 
+  map(~ clean_consensus(main_path,.x, 11)) %>% 
   bind_rows() %>% 
   mutate(country = case_when(country == "USA" ~ "United States",
                              country == "UK" ~ "United Kingdom",
@@ -93,7 +103,10 @@ df <- subdirectory %>%
                              T ~ country))
 
 
-saveRDS(df, "../Forecasts_Time_Covid_material/intermediate_data/consensus_2020.RDS")
+# Export:
+
+list(df_mean, df_sd) %>% 
+  walk2(c("","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020",.y,".RDS")))
 
 
 

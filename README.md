@@ -29,9 +29,9 @@ The folder contains:
 
 1. Preparation datasets
 
-2. Comparison between Consensus and WEO
+2. Comparison between Consensus, World Bank and WEO
 
-...
+3. Digging into June pessimism: source of errors and uncertainty
 
 The main sourcing file runs the entire project.
 The main file of each section cleans the global environment, installs and loads the packages required and sources all the scripts in the section. The function file contains custom functions used in the sections. Individual files run the functions and export the output.

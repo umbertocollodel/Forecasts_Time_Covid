@@ -7,6 +7,35 @@ consesus_sd=readRDS("../Forecasts_Time_Covid_material/intermediate_data/consensu
   mutate(country_code = countrycode(country,"country.name","imf")) %>% 
   filter(complete.cases(country_code))
 
+# Figure: individual countries uncertainty evolution ------
+
+selected_countries=c("Brazil","United States","China")
+
+
+consesus_sd %>% 
+  filter(country %in% selected_countries) %>% 
+  mutate(horizon = factor(horizon, levels = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug",
+                                              "Sep","Oct","Nov","Dec"))) %>% 
+  ggplot(aes(horizon,value, group = country,col = country)) +
+  geom_line(size = 2,alpha = 0.8) +
+  xlab("") +
+  ylab("Sd (%)") +
+  labs(col= "") +
+  scale_color_manual(values = c("#4472C4","#ED7D31","#92D050")) +
+  theme_minimal() +
+  theme(legend.position = "bottom",legend.text = element_text(size = 15)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21))
+  
+
+ggsave("../Forecasts_Time_Covid_material/output/figures/digging_june_pessimism/evolution_consensus_sd_individual.pdf",
+       height = 5.7,
+       width = 11)
+  
+  
+
+
 # Prepare weights dataframe for merging with Consensus sd -----
 # Note: apply same weights for following months after WEO issue before the next issue
 

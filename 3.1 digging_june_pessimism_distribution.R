@@ -20,6 +20,29 @@ df <- readRDS("../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS")
 
 
 
+# Figure - Scatter actual vs forecast (not weighted)
+
+
+df %>% 
+  ggplot(aes(value, Actual)) +
+  geom_abline(slope = 1, col = "black", size = 1) +
+  geom_point(size = 2,col = "dodgerblue4") +
+  xlab("Forecast (%)") +
+  ylab("Actual (%)") +
+  xlim(-20,10) +
+  ylim(-20,10) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21))
+
+
+ggsave("../Forecasts_Time_Covid_material/output/figures/digging_june_pessimism/actuals_vs_forecasts_unweighted.pdf",
+       width = 9.7,
+       height = 6.4)
+
+
+
 # Figure - Density plot of errors: balanced or asymmetric pessimism?: -----
 
 # Build density manually: 

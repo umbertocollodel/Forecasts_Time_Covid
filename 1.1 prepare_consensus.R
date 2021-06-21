@@ -10,7 +10,7 @@
 #' 
 #' @param main_path Path to directory with Consensus forecasts.
 #' @param subdirectory Subdirectory after main path with regional distinction survey.
-#' @param row_value_to_extract Number of row with the value to extract: can be 7 for mean or 11 for sd
+#' @param row_value_to_extract Number of row with the value to extract: 7 for mean, 9 for max, 10 for min and 11 for sd
 #' 
 #' @return tibble with three identifiers (horizon, value, country)
 #' 
@@ -92,6 +92,26 @@ df_mean <- subdirectory %>%
                              country == "UK" ~ "United Kingdom",
                              country == "Czechia" ~ "Czech Republic",
                              T ~ country))
+
+# Max forecast:
+
+df_max <- subdirectory %>% 
+  map(~ clean_consensus(main_path,.x, 9)) %>% 
+  bind_rows() %>% 
+  mutate(country = case_when(country == "USA" ~ "United States",
+                             country == "UK" ~ "United Kingdom",
+                             country == "Czechia" ~ "Czech Republic",
+                             T ~ country))
+
+# Min forecast:
+
+df_min <- subdirectory %>% 
+  map(~ clean_consensus(main_path,.x, 10)) %>% 
+  bind_rows() %>% 
+  mutate(country = case_when(country == "USA" ~ "United States",
+                             country == "UK" ~ "United Kingdom",
+                             country == "Czechia" ~ "Czech Republic",
+                             T ~ country))
 # Standard deviation:
 
 df_sd <- subdirectory %>% 
@@ -105,8 +125,8 @@ df_sd <- subdirectory %>%
 
 # Export:
 
-list(df_mean, df_sd) %>% 
-  walk2(c("","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020",.y,".RDS")))
+list(df_mean, df_max, df_min, df_sd) %>% 
+  walk2(c("","_max","_min","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020",.y,".RDS")))
 
 
 

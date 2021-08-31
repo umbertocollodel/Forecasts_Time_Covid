@@ -10,7 +10,9 @@
 #' 
 #' @param main_path Path to directory with Consensus forecasts.
 #' @param subdirectory Subdirectory after main path with regional distinction survey.
-#' @param row_value_to_extract Number of row with the value to extract: 7 for mean, 9 for max, 10 for min and 11 for sd
+#' @param row_value_to_extract Number of row with the value to extract: 5 for mean, 7 for max, 8 for min and 9 for sd.
+#' @param variable Name of the variable to extract. To get a sample of the correct names, read a sheet skipping the first two lines.
+#' Default is GDP.
 #' 
 #' @return tibble with three identifiers (horizon, value, country)
 #' 
@@ -18,7 +20,7 @@
 
 
 
-clean_consensus <- function(main_path,subdirectory,row_value_to_extract){
+clean_consensus <- function(main_path,subdirectory,row_value_to_extract, variable = "Gross Domestic"){
 
   if(subdirectory == "Asia_Pacific"){
     
@@ -46,20 +48,18 @@ path_files=list.files(paste0(main_path,"/",subdirectory)) %>%
 df_to_clean=path_files %>% 
   map(~ name_countries %>% 
         map(function(x) { 
-            read_xlsx(.x, sheet = x)
+            read_xlsx(.x, sheet = x, skip = 2)
   })
   ) 
 
 
 
-
 dfs_final =df_to_clean %>%
   modify_depth(2, ~ .x %>% slice(row_value_to_extract)) %>% 
-  modify_depth(2, ~ .x %>% select(3)) %>%
+  modify_depth(2, ~ .x %>% select(variable)) %>%
   modify_depth(2, ~ .x %>% setNames(c("value"))) %>%
   map(~ .x %>% bind_rows()) %>% 
   map(~ .x %>% mutate(country = name_countries))
-
 
 names(dfs_final) = path_files %>% str_extract("[A-Z]{1}[a-z]{2}2020") %>% str_remove("2020")
 
@@ -127,6 +127,7 @@ df_sd <- subdirectory %>%
 
 list(df_mean, df_max, df_min, df_sd) %>% 
   walk2(c("","_max","_min","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020",.y,".RDS")))
+
 
 
 

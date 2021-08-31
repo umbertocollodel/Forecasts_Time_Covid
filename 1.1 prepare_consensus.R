@@ -77,60 +77,57 @@ dfs_final %>%
 
 
 main_path="../Forecasts_Time_Covid_material/raw_data/Consensus_2020"
-subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America")
-
+subdirectory=c("Asia_Pacific","G7_Western_Europe","East_Europe","Latin_America") # Regions sheets
+rows=c(5,7,8,9) # Distribution values of Consensus forecasts
 
 
 # Running the function and export intermediate datasets: -----
+# Note: apply function for each value of the distribution we want to extract and each region.
+# We obtain a nested list whose upper level is the value of the distribution and the lower is the region. 
 
-# Mean forecast:
 
-df_mean <- subdirectory %>% 
-  map(~ clean_consensus(main_path,.x, 7)) %>% 
-  bind_rows() %>% 
-  mutate(country = case_when(country == "USA" ~ "United States",
-                             country == "UK" ~ "United Kingdom",
-                             country == "Czechia" ~ "Czech Republic",
-                             T ~ country))
+# Run for GDP:
 
-# Max forecast:
 
-df_max <- subdirectory %>% 
-  map(~ clean_consensus(main_path,.x, 9)) %>% 
-  bind_rows() %>% 
-  mutate(country = case_when(country == "USA" ~ "United States",
-                             country == "UK" ~ "United Kingdom",
-                             country == "Czechia" ~ "Czech Republic",
-                             T ~ country))
+gdp_forecasts <- rows %>% 
+  map(~ map(subdirectory, function(x){
+    clean_consensus(main_path,x,.x,"Gross Domestic")
+    })
+  ) %>% 
+  map(~ .x %>% bind_rows())
+  map(~ .x %>% mutate(country = case_when(country == "USA" ~ "United States",
+                           country == "UK" ~ "United Kingdom",
+                           country == "Czechia" ~ "Czech Republic",
+                           T ~ country)))
 
-# Min forecast:
 
-df_min <- subdirectory %>% 
-  map(~ clean_consensus(main_path,.x, 10)) %>% 
-  bind_rows() %>% 
-  mutate(country = case_when(country == "USA" ~ "United States",
-                             country == "UK" ~ "United Kingdom",
-                             country == "Czechia" ~ "Czech Republic",
-                             T ~ country))
-# Standard deviation:
+# Run for inflation:
 
-df_sd <- subdirectory %>% 
-  map(~ clean_consensus(main_path,.x, 11)) %>% 
-  bind_rows() %>% 
-  mutate(country = case_when(country == "USA" ~ "United States",
-                             country == "UK" ~ "United Kingdom",
-                             country == "Czechia" ~ "Czech Republic",
-                             T ~ country))
+inflation_forecasts <- rows %>% 
+  map(~ map(subdirectory, function(x){
+    clean_consensus(main_path,x,.x,contains("Consumer"))
+  })
+  ) %>% 
+  map(~ .x %>% bind_rows()) %>% 
+  map(~ .x %>% mutate(country = case_when(country == "USA" ~ "United States",
+                                        country == "UK" ~ "United Kingdom",
+                                        country == "Czechia" ~ "Czech Republic",
+                                        T ~ country)))
+
+
 
 
 # Export:
 
-list(df_mean, df_max, df_min, df_sd) %>% 
+
+# Export GDP:
+
+gdp_forecasts %>% 
   walk2(c("","_max","_min","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020",.y,".RDS")))
+ 
+# Export inflation:
+ 
+inflation_forecasts %>% 
+  walk2(c("","_max","_min","_sd"), ~ saveRDS(.x, paste0("../Forecasts_Time_Covid_material/intermediate_data/consensus_2020_inflation",.y,".RDS")))
 
 
-
-
-  
-
-  

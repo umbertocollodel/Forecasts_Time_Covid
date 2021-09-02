@@ -57,15 +57,24 @@ weights_global_comparison <- df_weights_global %>%
        ~ .x %>% mutate(horizon = .y)) %>% 
   bind_rows()
 
-# Combine and plot weighted sd evolution ----
+# Figure: global standard deviation (calculated with weights and simple median) ----
+# Note: with weights inflation results highly influenced by outliers, better to use median value for
+# comparison
 
-consesus_sd %>% 
+global_sd_df <- consesus_sd %>% 
   map(~ .x %>% merge(weights_global_comparison, by=c("country_code","horizon"))) %>% 
   map(~ .x %>% mutate(weighted_sd = value*weight)) %>% 
   map(~ .x %>% group_by(horizon)) %>% 
-  map(~ .x %>% summarise(global_sd = sum(weighted_sd))) %>% 
+  map(~ .x %>% summarise(global_sd = sum(weighted_sd),
+                         median_sd = median(value, na.rm = T))) %>% 
   map(~ .x %>% mutate(horizon = factor(horizon, levels = c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug",
-                                              "Sep","Oct","Nov","Dec")))) %>% 
+                                              "Sep","Oct","Nov","Dec")))) 
+
+
+# Plot: global using weights
+
+
+global_sd_weighted <- global_sd_df %>% 
   map(~ .x %>% ggplot(aes(horizon, global_sd)) +
   geom_point(size = 3, col = "#4472C4",alpha = 0.8) +
   xlab("") +
@@ -75,9 +84,34 @@ consesus_sd %>%
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21)))
 
+# Export: 
+
+global_sd_weighted %>% 
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/digging_june_pessimism/consensus_sd_global_",.y,"_weighted.pdf"),
+                 .x,
+                 height = 5.7,
+                 width = 11))
+
+
+# Plot: global using median value
+
+global_sd_median <- global_sd_df %>% 
+  map(~ .x %>% ggplot(aes(horizon, median_sd)) +
+        geom_point(size = 3, col = "#4472C4",alpha = 0.8) +
+        xlab("") +
+        ylab("Weighted Sd (%)") +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
+        theme(axis.text = element_text(size = 18),
+              axis.title = element_text(size = 21)))
 
 # Export: 
 
-ggsave("../Forecasts_Time_Covid_material/output/figures/digging_june_pessimism/evolution_Consensus_sd.pdf",
-       height = 5.7,
-       width = 11)
+global_sd_median %>% 
+  iwalk(~ ggsave(paste0("../Forecasts_Time_Covid_material/output/figures/digging_june_pessimism/consensus_sd_global_",.y,"_median.pdf"),
+                 .x,
+                 height = 5.7,
+                 width = 11))
+
+
+

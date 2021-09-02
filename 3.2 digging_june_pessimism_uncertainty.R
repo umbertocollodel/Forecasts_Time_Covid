@@ -1,4 +1,4 @@
-######### Script to show evolution of Consensus weighted standard deviation and
+######### Script to show evolution of global Consensus weighted standard deviation and
 ######### individual case studies for different variables over 2020 horizon
 
 

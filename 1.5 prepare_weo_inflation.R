@@ -43,5 +43,6 @@ actuals <- read_xlsx("../Forecasts_Time_Covid_material/raw_data/WEO/inflation.xl
 merge(weo_inflation, actuals, by=c("country_code","year")) %>%
   mutate(country = countrycode(country_code,"imf","country.name")) %>% 
   filter(complete.cases(country)) %>% 
+  select(country, country_code, year, horizon, Actual, value) %>% 
   as_tibble() %>% 
   saveRDS("../Forecasts_Time_Covid_material/intermediate_data/weo_2020_inflation.RDS")

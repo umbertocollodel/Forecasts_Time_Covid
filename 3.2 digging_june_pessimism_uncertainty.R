@@ -99,7 +99,7 @@ global_sd_median <- global_sd_df %>%
   map(~ .x %>% ggplot(aes(horizon, median_sd)) +
         geom_point(size = 3, col = "#4472C4",alpha = 0.8) +
         xlab("") +
-        ylab("Weighted Sd (%)") +
+        ylab("Median Sd (%)") +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1)) +
         theme(axis.text = element_text(size = 18),

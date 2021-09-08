@@ -1,9 +1,12 @@
 ###### Script to compare individual country forecasts from WEO and Consensus
 
 
-# Combine Consensus and WEO intermediate data -----
 
-names_df=c("consensus_2020","weo_2020")
+
+# Combine Consensus and WEO intermediate data -----
+# NOTE: to compare inflation rather than growth forecasts, uncomment line 10 and change export paths
+
+names_df=c("consensus_2020","weo_2020")  %>%  map_chr(~ paste0(.x,"_inflation"))
 
 
 comparison_df <- names_df %>% 
@@ -20,7 +23,7 @@ comparison_df <- names_df %>%
   select(country_code, country, horizon, actual, consensus,imf)
 
 
-export(comparison_df,"../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries.xlsx")
+export(comparison_df,"../Forecasts_Time_Covid_material/intermediate_data/replication_figures/comparison_individual_countries_inflation.xlsx")
 
 
 # Run comparison ------

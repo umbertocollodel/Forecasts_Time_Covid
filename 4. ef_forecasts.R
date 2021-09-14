@@ -1,22 +1,34 @@
-# Load programs dataset: ----
+######## Script to compare average forecast errors countries with emergency financing and not
 
-program_countries=read_xlsx("~/Dropbox/Emergency_response_covid/Emergency_response_covid_material/raw_data/emergency_facilities.xlsx") %>% 
-  .$Country %>%
+
+
+# List of countries emergency financing or standard programs during the evaluation period: ----
+
+
+program_countries <- read_xlsx("../Forecasts_Time_Covid_material/raw_data/emergency_financing.xlsx") %>%
+  filter(Type != "Catastrophe Containment and Relief Trust (CCRT)") %>% 
+  .$Country %>% 
   countrycode(.,"country.name","imf") %>%
   .[complete.cases(.)] %>% 
   unique()
 
+# Study the difference in average errors between two groups (program/no program) over the forecast horizon ----
 
-# Do the regressions:
+# Create a clean dataframe with forecast errors:
 
 
-significance <- read_rds("../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS") %>% 
+forecasts_df <- read_rds("../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS") %>% 
   mutate(ef = case_when(country_code %in% program_countries ~ "EF",
                         T ~ "No EF")) %>%
   mutate(error = Actual - value) %>% 
   filter(horizon != "Jan") %>% 
-  group_by(horizon, ef) %>% 
-  mutate(error = DescTools::Winsorize(error, na.rm = T)) %>% 
+  group_by(horizon) %>% 
+  mutate(error = DescTools::Winsorize(error, na.rm = T))
+
+
+# Significance average forecast error by group and period
+
+significance_df <- forecasts_df %>% 
   split(.$horizon) %>% 
   map(~ .x %>% split(.$ef)) %>% 
   modify_depth(2, ~ lm(error ~ 1, .x)) %>% 
@@ -27,20 +39,14 @@ significance <- read_rds("../Forecasts_Time_Covid_material/intermediate_data/weo
   bind_rows(.id = "horizon") %>% 
   mutate(signif = case_when(t.value >= 1.64 | t.value <= -1.64 ~ "***",
                              T ~ ""))
-  
-  
 
 
-# Merge with forecasts data:
+# Plot average forecast error by group and period adding significance:
 
-  read_rds("../Forecasts_Time_Covid_material/intermediate_data/weo_2020.RDS") %>% 
-    mutate(ef = case_when(country_code %in% program_countries ~ "EF",
-                          T ~ "No EF")) %>%
-    mutate(error = Actual - value) %>% 
-    filter(horizon != "Jan") %>% 
+forecasts_df %>% 
     mutate(horizon = factor(horizon, levels = c("Apr","Jun","Oct"))) %>% 
+    ungroup() %>% 
     group_by(horizon, ef) %>% 
-    mutate(error = DescTools::Winsorize(error, na.rm = T)) %>% 
     summarise(mean_error = mean(error, na.rm = T)) %>% 
     merge(significance) %>% 
     ggplot(aes(y=mean_error, x = ef, fill = ef)) +
@@ -65,3 +71,7 @@ significance <- read_rds("../Forecasts_Time_Covid_material/intermediate_data/weo
 ggsave("../Forecasts_Time_Covid_material/output/figures/ef_forecasts/ef_forecasts_bias.pdf",
        height = 5.7,
        width = 11)
+
+
+
+

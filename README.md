@@ -1,17 +1,16 @@
 # Forecasts_in_Time_of_COVID
 
+The repository studies the evolution and the determinants of real GDP forecasts during the
+Covid-19 pandemic. In contrast with the early performance during recessions, forecasters were pessimistic during the summer period and with significant differences across institution.
 
-This repositories makes available the code to produce all figures and tables in the paper:
+Evolution of Global (weighted) GDP growth forecasts:
+<img src="https://user-images.githubusercontent.com/33840988/166447242-65311f24-37ab-42c8-b391-c0fa99c91a4b.png" width="650" />
 
-...
-
-Please cite us if you refer to our paper.
 
 ## Author
 
 Umberto Collodel (umberto.collodel@gmail.com) <br/>
 
-...
 
 ## Language
 
